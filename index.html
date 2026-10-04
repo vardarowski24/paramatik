@@ -52,7 +52,6 @@
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
     }
-    /* Çentik ve Saat/Pil Bölgesi İçin Zorunlu Üst Boşluk */
     .app-header {
       padding-top: calc(env(safe-area-inset-top, 44px) + 12px) !important;
     }
@@ -79,7 +78,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-black pb-24 select-none">
 
-  <!-- TOP HEADER WITH FIXED NOTCH PADDING -->
+  <!-- TOP HEADER -->
   <header class="app-header px-4 pb-3 border-b border-slate-800/80 bg-slate-900/95 backdrop-blur sticky top-0 z-20">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -157,7 +156,7 @@
 
       <div class="flex items-baseline justify-between mt-1">
         <div>
-          <span class="text-[11px] text-slate-400">Harcanan: </span>
+          <span class="text-[11px] text-slate-400">Net Harcanan: </span>
           <span id="dispHavuzASpent" class="text-2xl font-black text-white">0,00 ₺</span>
         </div>
         <div class="text-right">
@@ -215,9 +214,7 @@
         <i class="fa-solid fa-brain-circuit text-sm"></i>
         <span>Matematiksel Bütçe Asistanı</span>
       </div>
-      <div id="assistantFeedbackList" class="space-y-2 text-xs text-slate-300 leading-relaxed">
-        <!-- Dinamik hesaplanan asistan mesajları -->
-      </div>
+      <div id="assistantFeedbackList" class="space-y-2 text-xs text-slate-300 leading-relaxed"></div>
     </div>
 
     <!-- KATEGORİ GRAFİK AKORDİYONU -->
@@ -251,9 +248,7 @@
         <button id="filterTabHavuzB" class="py-1.5 rounded-lg hover:text-slate-200 transition">Ekstrem</button>
       </div>
 
-      <div id="transactionFeed" class="space-y-2 pb-6">
-        <!-- İşlemler -->
-      </div>
+      <div id="transactionFeed" class="space-y-2 pb-6"></div>
       
       <div id="emptyFeedMessage" class="hidden text-center py-10 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
         <i class="fa-solid fa-receipt text-2xl text-slate-600 mb-2 block"></i>
@@ -300,6 +295,7 @@
 
       <form id="formAddTx" class="space-y-4">
 
+        <!-- Type Selector -->
         <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
           <label class="cursor-pointer">
             <input type="radio" name="txType" value="EXPENSE" class="peer sr-only" checked>
@@ -310,7 +306,7 @@
           <label class="cursor-pointer">
             <input type="radio" name="txType" value="INCOME" class="peer sr-only">
             <div class="py-2.5 rounded-xl text-center text-xs font-bold text-slate-400 peer-checked:bg-emerald-500/20 peer-checked:text-emerald-400 peer-checked:border peer-checked:border-emerald-500/40 transition">
-              <i class="fa-solid fa-arrow-trend-up mr-1"></i> Burs / Gelir
+              <i class="fa-solid fa-arrow-trend-up mr-1"></i> Gelir / İade
             </div>
           </label>
         </div>
@@ -323,10 +319,11 @@
           </div>
         </div>
 
+        <!-- Havuz Seçimi -->
         <div id="sourceContainer">
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Hangi Havuzdan? *</label>
-          <div class="grid grid-cols-3 gap-2">
-            <label class="cursor-pointer">
+          <label id="lblSourceContainer" class="block text-[11px] font-semibold text-slate-400 mb-1">Hangi Havuzdan? *</label>
+          <div class="grid grid-cols-3 gap-2" id="sourceBtnGrid">
+            <label class="cursor-pointer" id="srcFatherWrapper">
               <input type="radio" name="txSource" value="BABA" class="peer sr-only" checked>
               <div class="p-2 rounded-2xl border border-slate-800 bg-slate-950 peer-checked:border-orange-500 peer-checked:bg-orange-500/10 text-center transition">
                 <i class="fa-solid fa-credit-card text-orange-400 block mb-1 text-sm"></i>
@@ -334,7 +331,7 @@
                 <span class="text-[8px] text-slate-500">Hedef Kota</span>
               </div>
             </label>
-            <label class="cursor-pointer">
+            <label class="cursor-pointer" id="srcHavuzAWrapper">
               <input type="radio" name="txSource" value="HAVUZA" class="peer sr-only">
               <div class="p-2 rounded-2xl border border-slate-800 bg-slate-950 peer-checked:border-sky-500 peer-checked:bg-sky-500/10 text-center transition">
                 <i class="fa-solid fa-wallet text-sky-400 block mb-1 text-sm"></i>
@@ -342,12 +339,12 @@
                 <span class="text-[8px] text-slate-500">Aylık Harçlık</span>
               </div>
             </label>
-            <label class="cursor-pointer">
+            <label class="cursor-pointer" id="srcHavuzBWrapper">
               <input type="radio" name="txSource" value="HAVUZB" class="peer sr-only">
               <div class="p-2 rounded-2xl border border-slate-800 bg-slate-950 peer-checked:border-purple-500 peer-checked:bg-purple-500/10 text-center transition">
                 <i class="fa-solid fa-vault text-purple-400 block mb-1 text-sm"></i>
                 <span class="text-[10px] font-bold text-slate-200 block">Havuz B</span>
-                <span class="text-[8px] text-slate-500">Ekstrem Çıkış</span>
+                <span class="text-[8px] text-slate-500">Ana Birikim</span>
               </div>
             </label>
           </div>
@@ -362,7 +359,7 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[10px] font-semibold text-slate-400 mb-1">Açıklama</label>
-            <input type="text" id="txNote" placeholder="Örn: Apple Watch veya Akşam yemeği" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs text-white outline-none focus:border-brand-500">
+            <input type="text" id="txNote" placeholder="Örn: Borç ödemesi veya Akşam yemeği" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs text-white outline-none focus:border-brand-500">
           </div>
           <div>
             <label class="block text-[10px] font-semibold text-slate-400 mb-1">Tarih</label>
@@ -415,7 +412,7 @@
     </div>
   </div>
 
-  <!-- MODAL: AYARLAR & KURULUM -->
+  <!-- MODAL: AYARLAR -->
   <div id="modalSettings" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex flex-col justify-end opacity-0 sheet-transition">
     <div id="sheetSettingsContent" class="bg-slate-900 border-t border-slate-700/80 rounded-t-[32px] w-full max-w-md mx-auto p-5 max-h-[90vh] overflow-y-auto no-scrollbar transform translate-y-full sheet-transition space-y-4">
       <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto -mt-1 mb-2"></div>
@@ -479,7 +476,7 @@
         </div>
         <div class="p-3 rounded-xl bg-slate-950 border border-sky-500/30">
           <strong class="text-sky-400 block mb-1">2. Havuz A (Harçlık)</strong>
-          Her ayın 1'inde yenilenir. Kız arkadaşla yemek, alkol/sosyal ve okul yemekleri buradan düşer.
+          Her ayın 1'inde yenilenir. Kız arkadaşla yemek, alkol/sosyal ve okul yemekleri buradan düşer. Kız arkadaşın para iade ettiğinde Havuz A'ya gelir girerek harcanabilir bütçeni geri büyütebilirsin.
         </div>
         <div class="p-3 rounded-xl bg-slate-950 border border-orange-500/30">
           <strong class="text-orange-400 block mb-1">3. Babanın Kartı</strong>
@@ -533,9 +530,11 @@
     ];
 
     const INCOME_TAGS = [
-      { name: 'Aylık Harçlık', icon: 'fa-hand-holding-dollar' },
-      { name: 'Burs', icon: 'fa-graduation-cap' },
-      { name: 'Ek Gelir', icon: 'fa-briefcase' }
+      { name: 'Geri Ödeme / Borç İadesi', icon: 'fa-rotate-left' },
+      { name: 'Burs / Destek', icon: 'fa-graduation-cap' },
+      { name: 'Elden Harçlık', icon: 'fa-hand-holding-dollar' },
+      { name: 'Maaş / Ek Gelir', icon: 'fa-briefcase' },
+      { name: 'Diğer Gelir', icon: 'fa-wallet' }
     ];
 
     function loadStorage() {
@@ -585,15 +584,26 @@
       transactions.forEach(t => {
         const amt = parseFloat(t.amount) || 0;
 
+        // Havuz B hesapları (Ekstrem Gider veya Doğrudan Havuz B Geliri)
         if (t.source === 'HAVUZB') {
-          havuzB_Total -= amt;
+          if (t.type === 'INCOME') {
+            havuzB_Total += amt;
+          } else {
+            havuzB_Total -= amt;
+          }
         }
 
+        // Aktif/Seçili ay filtreleri
         if (t.date.startsWith(currentMonthKey)) {
           if (t.source === 'HAVUZA') {
-            monthHavuzA_Spent += amt;
-            if (t.tag === 'Okul / Günlük Yemek' && t.date === todayStr) {
-              todayCampus_Spent += amt;
+            if (t.type === 'INCOME') {
+              // Gelir / İade girildiyse harcanan tutarı azaltır (bütçeyi geri kazandırır!)
+              monthHavuzA_Spent -= amt;
+            } else {
+              monthHavuzA_Spent += amt;
+              if (t.tag === 'Okul / Günlük Yemek' && t.date === todayStr) {
+                todayCampus_Spent += amt;
+              }
             }
           } else if (t.source === 'BABA') {
             monthFather_Spent += amt;
@@ -610,13 +620,14 @@
       document.getElementById('dispHavuzB_USD').innerText = `${Number(config.usdSavings || 0).toLocaleString('tr-TR')} $`;
 
       const havuzALimit = parseFloat(config.havuzALimit) || 0;
+      // Kalan bütçe = Limit - Net Harcanan (Net harcanan azaldıkça kalan artar)
       const havuzARemaining = Math.max(0, havuzALimit - monthHavuzA_Spent);
-      document.getElementById('dispHavuzASpent').innerText = formatTL(monthHavuzA_Spent);
+      document.getElementById('dispHavuzASpent').innerText = formatTL(Math.max(0, monthHavuzA_Spent));
       document.getElementById('dispHavuzALimit').innerText = formatTL(havuzALimit);
       document.getElementById('badgeHavuzAStatus').innerText = `Kalan: ${formatTL(havuzARemaining)}`;
       document.getElementById('dispPotansiyelTasarruf').innerText = `Birikime Devir: ${formatTL(havuzARemaining)}`;
 
-      const havuzAPercent = havuzALimit > 0 ? Math.min(100, Math.round((monthHavuzA_Spent / havuzALimit) * 100)) : 0;
+      const havuzAPercent = havuzALimit > 0 ? Math.min(100, Math.round((Math.max(0, monthHavuzA_Spent) / havuzALimit) * 100)) : 0;
       const barA = document.getElementById('barHavuzAUsage');
       barA.style.width = `${havuzAPercent}%`;
       barA.className = havuzAPercent > 90 ? 'bg-gradient-to-r from-rose-500 to-red-600 h-full rounded-full transition-all' : 'bg-gradient-to-r from-sky-500 to-teal-400 h-full rounded-full transition-all';
@@ -719,7 +730,8 @@
 
       let saveMsg = '';
       if (havuzALimit > 0) {
-        const dailySpendA = havuzASpent / Math.max(1, currentDay);
+        const netSpent = Math.max(0, havuzASpent);
+        const dailySpendA = netSpent / Math.max(1, currentDay);
         const estMonthSpendA = dailySpendA * totalDays;
         const estSavings = Math.max(0, havuzALimit - estMonthSpendA);
         
@@ -763,17 +775,29 @@
         item.className = 'bg-slate-900 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between shadow-sm active:scale-[0.99] transition';
 
         let sourceBadge = '';
-        let amountText = `-${formatTL(tx.amount)}`;
-        let amountClass = 'text-slate-100';
+        let amountText = '';
+        let amountClass = '';
 
-        if (tx.source === 'BABA') {
-          sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-credit-card text-[8px]"></i> Baba Kartı</span>`;
-          amountClass = 'text-orange-400';
-        } else if (tx.source === 'HAVUZA') {
-          sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20"><i class="fa-solid fa-wallet text-[8px]"></i> Harçlık (Havuz A)</span>`;
-        } else if (tx.source === 'HAVUZB') {
-          sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20"><i class="fa-solid fa-vault text-[8px]"></i> Ekstrem (Havuz B)</span>`;
-          amountClass = 'text-purple-400';
+        if (tx.type === 'INCOME') {
+          amountText = `+${formatTL(tx.amount)}`;
+          amountClass = 'text-emerald-400';
+          if (tx.source === 'HAVUZA') {
+            sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-arrow-down-left text-[8px]"></i> Harçlığa Eklendi (Havuz A)</span>`;
+          } else {
+            sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20"><i class="fa-solid fa-vault text-[8px]"></i> Birikime Eklendi (Havuz B)</span>`;
+          }
+        } else {
+          amountText = `-${formatTL(tx.amount)}`;
+          if (tx.source === 'BABA') {
+            sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-credit-card text-[8px]"></i> Baba Kartı</span>`;
+            amountClass = 'text-orange-400';
+          } else if (tx.source === 'HAVUZA') {
+            sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20"><i class="fa-solid fa-wallet text-[8px]"></i> Harçlık (Havuz A)</span>`;
+            amountClass = 'text-slate-100';
+          } else if (tx.source === 'HAVUZB') {
+            sourceBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20"><i class="fa-solid fa-vault text-[8px]"></i> Ekstrem (Havuz B)</span>`;
+            amountClass = 'text-purple-400';
+          }
         }
 
         item.innerHTML = `
@@ -864,6 +888,7 @@
       });
     }
 
+    // Kategori butonlarını Gider veya Gelire göre oluşturur
     function renderTagChips(type) {
       const container = document.getElementById('tagChipsContainer');
       container.innerHTML = '';
@@ -882,12 +907,15 @@
           btn.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 transition border bg-brand-500 text-slate-950 border-brand-500';
           document.getElementById('selectedTag').value = t.name;
 
-          if (t.name.includes('Ekstrem')) {
-            document.querySelector('input[name="txSource"][value="HAVUZB"]').checked = true;
-          } else if (t.name.includes('Okul') || t.name.includes('Kız Arkadaş') || t.name.includes('Alkol')) {
-            document.querySelector('input[name="txSource"][value="HAVUZA"]').checked = true;
-          } else if (t.name.includes('Market')) {
-            document.querySelector('input[name="txSource"][value="BABA"]').checked = true;
+          // Giderdeyken otomatik kaynak tahmini
+          if (type === 'EXPENSE') {
+            if (t.name.includes('Ekstrem')) {
+              document.querySelector('input[name="txSource"][value="HAVUZB"]').checked = true;
+            } else if (t.name.includes('Okul') || t.name.includes('Kız Arkadaş') || t.name.includes('Alkol')) {
+              document.querySelector('input[name="txSource"][value="HAVUZA"]').checked = true;
+            } else if (t.name.includes('Market')) {
+              document.querySelector('input[name="txSource"][value="BABA"]').checked = true;
+            }
           }
         });
 
@@ -895,6 +923,26 @@
       });
 
       document.getElementById('selectedTag').value = tags[0].name;
+    }
+
+    // Gider/Gelir değiştiğinde modal arayüzünü günceller
+    function updateModalMode(type) {
+      const lblSource = document.getElementById('lblSourceContainer');
+      const srcFather = document.getElementById('srcFatherWrapper');
+      const radioHavuzA = document.querySelector('input[name="txSource"][value="HAVUZA"]');
+      const radioBaba = document.querySelector('input[name="txSource"][value="BABA"]');
+
+      if (type === 'INCOME') {
+        lblSource.innerText = "Hangi Havuza Eklensin? *";
+        srcFather.classList.add('hidden'); // Babanın kartına gelir girilemez
+        radioHavuzA.checked = true; // Varsayılan olarak kendi harçlığına (Havuz A) gelsin
+      } else {
+        lblSource.innerText = "Hangi Havuzdan? *";
+        srcFather.classList.remove('hidden');
+        radioBaba.checked = true;
+      }
+
+      renderTagChips(type);
     }
 
     function openBottomSheet(modalEl, sheetEl) {
@@ -926,7 +974,16 @@
       const sheetHelpContent = document.getElementById('sheetHelpContent');
 
       document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+      
+      // Başlangıç çipleri
       renderTagChips('EXPENSE');
+
+      // Gider / Gelir radio buton dinleyicisi
+      document.querySelectorAll('input[name="txType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          updateModalMode(e.target.value);
+        });
+      });
 
       document.getElementById('btnPrevMonth').addEventListener('click', () => {
         viewDate.setMonth(viewDate.getMonth() - 1);
@@ -963,6 +1020,7 @@
       document.getElementById('btnNavHelp').addEventListener('click', () => openBottomSheet(modalHelp, sheetHelpContent));
       document.getElementById('btnCloseHelpModal').addEventListener('click', () => closeBottomSheet(modalHelp, sheetHelpContent));
 
+      // İşlem Ekle Submit
       document.getElementById('formAddTx').addEventListener('submit', (e) => {
         e.preventDefault();
         const amt = parseFloat(document.getElementById('txAmount').value);
@@ -972,7 +1030,7 @@
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (date > todayStr) {
-          alert('Gelecekteki bir tarih için harcama kaydı ekleyemezsin.');
+          alert('Gelecekteki bir tarih için harcama/gelir kaydı ekleyemezsin.');
           return;
         }
 
@@ -997,9 +1055,15 @@
 
         document.getElementById('txAmount').value = '';
         document.getElementById('txNote').value = '';
+        
+        // Modalı tekrar varsayılan gider moduna sıfırla
+        document.querySelector('input[name="txType"][value="EXPENSE"]').checked = true;
+        updateModalMode('EXPENSE');
+
         closeBottomSheet(modalAddTx, sheetContent);
       });
 
+      // Döviz Alım Submit
       document.getElementById('formFx').addEventListener('submit', (e) => {
         e.preventDefault();
         const curr = document.getElementById('fxCurrency').value;
@@ -1029,6 +1093,7 @@
         closeBottomSheet(modalFx, sheetFxContent);
       });
 
+      // Ayarlar Submit
       document.getElementById('formSettings').addEventListener('submit', (e) => {
         e.preventDefault();
         config.initialSavings_TL = parseFloat(document.getElementById('inputInitialSavings').value) || 0;
@@ -1042,6 +1107,7 @@
         closeBottomSheet(modalSettings, sheetSettingsContent);
       });
 
+      // Sıfırlama
       document.getElementById('btnResetData').addEventListener('click', () => {
         if (!confirm('Tüm veriler silinsin ve varsayılan ayarlara dönülsün mü?')) return;
         localStorage.removeItem(KEY_TXS);
@@ -1061,6 +1127,7 @@
         closeBottomSheet(modalSettings, sheetSettingsContent);
       });
 
+      // Filtreleme Tabları
       const tabAll = document.getElementById('filterTabAll');
       const tabFather = document.getElementById('filterTabFather');
       const tabHavuzA = document.getElementById('filterTabHavuzA');
@@ -1080,6 +1147,7 @@
       tabHavuzA.addEventListener('click', () => setTab(tabHavuzA, 'HAVUZA'));
       tabHavuzB.addEventListener('click', () => setTab(tabHavuzB, 'HAVUZB'));
 
+      // Grafik Accordion
       const btnToggleChart = document.getElementById('btnToggleChart');
       const chartContainer = document.getElementById('chartContainer');
       const iconToggleChart = document.getElementById('iconToggleChart');
@@ -1095,6 +1163,7 @@
         }
       });
 
+      // Export CSV
       document.getElementById('btnExportCsv').addEventListener('click', () => {
         if (transactions.length === 0) return alert('İndirilecek kayıt bulunamadı.');
         let csv = "data:text/csv;charset=utf-8,\uFEFF";
