@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#020617">
+  <meta name="theme-color" content="#090d16">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Paramatik">
   <title>Paramatik - Kişisel Bütçe</title>
 
@@ -52,8 +52,9 @@
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
     }
-    .safe-top {
-      padding-top: max(env(safe-area-inset-top), 48px);
+    /* Çentik ve Saat/Pil Bölgesi İçin Zorunlu Üst Boşluk */
+    .app-header {
+      padding-top: calc(env(safe-area-inset-top, 44px) + 12px) !important;
     }
     .safe-bottom {
       padding-bottom: max(env(safe-area-inset-bottom), 16px);
@@ -78,8 +79,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-black pb-24 select-none">
 
-  <!-- TOP HEADER WITH MONTH SELECTOR -->
-  <header class="safe-top px-4 pt-3 pb-2 border-b border-slate-800/80 bg-slate-900/95 backdrop-blur sticky top-0 z-20">
+  <!-- TOP HEADER WITH FIXED NOTCH PADDING -->
+  <header class="app-header px-4 pb-3 border-b border-slate-800/80 bg-slate-900/95 backdrop-blur sticky top-0 z-20">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
         <button id="btnPrevMonth" class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white active:scale-95 transition">
@@ -489,11 +490,9 @@
   </div>
 
   <script>
-    // STORAGE KEYS
     const KEY_TXS = 'ogrenci_finans_txs_clean';
     const KEY_CFG = 'ogrenci_finans_cfg_clean';
 
-    // SIFIRLANMIŞ DEFAULT STATE (Kaynak kodda para bilgisi bulunmaz)
     let config = {
       isConfigured: false,
       initialSavings_TL: 0,
@@ -565,7 +564,6 @@
       const isViewingActiveMonth = (realMonthKey === currentMonthKey);
       const todayStr = today.toISOString().split('T')[0];
 
-      // Üst rozeti aya göre güncelle
       const badgeEl = document.getElementById('dispPeriodBadge');
       if (isViewingActiveMonth) {
         badgeEl.innerText = 'Aktif Bütçe Dönemi';
@@ -607,7 +605,6 @@
         }
       });
 
-      // UI Güncellemeleri
       document.getElementById('dispHavuzB_TL').innerText = formatTL(havuzB_Total);
       document.getElementById('dispHavuzB_EUR').innerText = `${Number(config.eurSavings || 0).toLocaleString('tr-TR')} €`;
       document.getElementById('dispHavuzB_USD').innerText = `${Number(config.usdSavings || 0).toLocaleString('tr-TR')} $`;
@@ -679,7 +676,6 @@
       const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
       const remainingDays = Math.max(1, totalDays - currentDay + 1);
 
-      // KURAL 1: Okul Yemek Analizi
       const campusLimit = parseFloat(config.dailyCampusLimit) || 300;
       let campusMsg = '';
       if (todayCampus > campusLimit) {
@@ -700,7 +696,6 @@
         `;
       }
 
-      // KURAL 2: Babanın Kartı Hız Tavsiyesi
       const fatherRemaining = fatherQuota - fatherSpent;
       let fatherMsg = '';
       if (fatherQuota > 0) {
@@ -722,7 +717,6 @@
         }
       }
 
-      // KURAL 3: Ay Sonu Tasarruf Projeksiyonu
       let saveMsg = '';
       if (havuzALimit > 0) {
         const dailySpendA = havuzASpent / Math.max(1, currentDay);
@@ -969,7 +963,6 @@
       document.getElementById('btnNavHelp').addEventListener('click', () => openBottomSheet(modalHelp, sheetHelpContent));
       document.getElementById('btnCloseHelpModal').addEventListener('click', () => closeBottomSheet(modalHelp, sheetHelpContent));
 
-      // Form Submit: İşlem Ekle
       document.getElementById('formAddTx').addEventListener('submit', (e) => {
         e.preventDefault();
         const amt = parseFloat(document.getElementById('txAmount').value);
@@ -1007,7 +1000,6 @@
         closeBottomSheet(modalAddTx, sheetContent);
       });
 
-      // Form Submit: Döviz Alım
       document.getElementById('formFx').addEventListener('submit', (e) => {
         e.preventDefault();
         const curr = document.getElementById('fxCurrency').value;
@@ -1037,7 +1029,6 @@
         closeBottomSheet(modalFx, sheetFxContent);
       });
 
-      // Form Submit: Ayarları Kaydet
       document.getElementById('formSettings').addEventListener('submit', (e) => {
         e.preventDefault();
         config.initialSavings_TL = parseFloat(document.getElementById('inputInitialSavings').value) || 0;
@@ -1051,7 +1042,6 @@
         closeBottomSheet(modalSettings, sheetSettingsContent);
       });
 
-      // Fabrika Ayarlarına Sıfırlama
       document.getElementById('btnResetData').addEventListener('click', () => {
         if (!confirm('Tüm veriler silinsin ve varsayılan ayarlara dönülsün mü?')) return;
         localStorage.removeItem(KEY_TXS);
@@ -1120,7 +1110,6 @@
         document.body.removeChild(a);
       });
 
-      // İlk Açılış Kontrolü
       calculateAndRefreshUI();
       if (!config.isConfigured) {
         setTimeout(() => {
