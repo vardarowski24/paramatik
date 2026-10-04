@@ -299,7 +299,6 @@
 
       <form id="formAddTx" class="space-y-4">
 
-        <!-- Type Selector -->
         <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
           <label class="cursor-pointer">
             <input type="radio" name="txType" value="EXPENSE" class="peer sr-only" checked>
@@ -323,7 +322,6 @@
           </div>
         </div>
 
-        <!-- Havuz Seçimi -->
         <div id="sourceContainer">
           <label id="lblSourceContainer" class="block text-[11px] font-semibold text-slate-400 mb-1">Hangi Havuzdan? *</label>
           <div class="grid grid-cols-3 gap-2" id="sourceBtnGrid">
@@ -491,14 +489,12 @@
   </div>
 
   <script>
-    const KEY_TXS = 'ogrenci_finans_txs_clean';
-    const KEY_CFG = 'ogrenci_finans_cfg_clean';
+    const KEY_TXS = 'paramatik_txs_v4';
+    const KEY_CFG = 'paramatik_cfg_v4';
 
     let config = {
       isConfigured: false,
       initialSavings_TL: 0,
-      eurSavings: 0,
-      usdSavings: 0,
       havuzALimit: 0,
       fatherQuota: 0,
       dailyCampusLimit: 300
@@ -579,17 +575,22 @@
         badgeEl.className = 'text-[9px] text-slate-400 font-semibold uppercase tracking-wider';
       }
 
-      // Havuz B Tabanı
       let havuzB_Total = parseFloat(config.initialSavings_TL) || 0;
       let monthHavuzA_Spent = 0;
       let monthFather_Spent = 0;
       let todayCampus_Spent = 0;
+      let totalEUR = 0;
+      let totalUSD = 0;
       const categoryTotals = {};
 
       transactions.forEach(t => {
         const amt = parseFloat(t.amount) || 0;
 
-        // Havuz B hareketleri (Tüm zamanlar toplamı)
+        // Döviz miktarını doğrudan transaction kayıtlarından topla
+        if (t.fxCurrency === 'EUR') totalEUR += (parseFloat(t.fxAmount) || 0);
+        if (t.fxCurrency === 'USD') totalUSD += (parseFloat(t.fxAmount) || 0);
+
+        // Havuz B hareketleri (Tüm zamanlar)
         if (t.source === 'HAVUZB') {
           if (t.type === 'INCOME') {
             havuzB_Total += amt;
@@ -602,7 +603,7 @@
         if (t.date.startsWith(currentMonthKey)) {
           if (t.source === 'HAVUZA') {
             if (t.type === 'INCOME') {
-              monthHavuzA_Spent -= amt; // Geri ödeme harcananı eksiltir
+              monthHavuzA_Spent -= amt;
             } else {
               monthHavuzA_Spent += amt;
               if (t.tag === 'Okul / Günlük Yemek' && t.date === todayStr) {
@@ -620,8 +621,8 @@
       });
 
       document.getElementById('dispHavuzB_TL').innerText = formatTL(havuzB_Total);
-      document.getElementById('dispHavuzB_EUR').innerText = `${Number(config.eurSavings || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} €`;
-      document.getElementById('dispHavuzB_USD').innerText = `${Number(config.usdSavings || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} $`;
+      document.getElementById('dispHavuzB_EUR').innerText = `${Number(totalEUR).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} €`;
+      document.getElementById('dispHavuzB_USD').innerText = `${Number(totalUSD).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} $`;
 
       const havuzALimit = parseFloat(config.havuzALimit) || 0;
       const havuzARemaining = Math.max(0, havuzALimit - monthHavuzA_Spent);
@@ -961,7 +962,6 @@
       }, 260);
     }
 
-    // Mobil klavyede virgülü noktaya çeviren yardımcı fonksiyon
     function parseLocaleNumber(val) {
       if (typeof val === 'number') return val;
       if (!val) return 0;
@@ -1067,7 +1067,7 @@
         closeBottomSheet(modalAddTx, sheetContent);
       });
 
-      // DÖVİZ ALIM SUBMIT (ÇİFT DÜŞME HATASI DÜZELTİLDİ)
+      // Döviz Alım Submit (Doğrudan transaction olarak eklenir, taban eksiltilmez)
       document.getElementById('formFx').addEventListener('submit', (e) => {
         e.preventDefault();
         const curr = document.getElementById('fxCurrency').value;
@@ -1076,12 +1076,6 @@
 
         if (isNaN(amount) || isNaN(costTL) || costTL <= 0) return;
 
-        // Döviz miktarını ekle
-        if (curr === 'EUR') config.eurSavings = (config.eurSavings || 0) + amount;
-        if (curr === 'USD') config.usdSavings = (config.usdSavings || 0) + amount;
-
-        // DÜZELTME: config.initialSavings_TL'den doğrudan düşmüyoruz.
-        // Aşağıdaki Havuz B işlemi eklenince calculateAndRefreshUI zaten otomatik düşecek.
         transactions.unshift({
           id: Date.now(),
           type: 'EXPENSE',
@@ -1089,6 +1083,8 @@
           source: 'HAVUZB',
           tag: 'Ekstrem (Apple Watch, Vize vb.)',
           note: `${amount} ${curr} Alımı`,
+          fxCurrency: curr,
+          fxAmount: amount,
           date: new Date().toISOString().split('T')[0]
         });
 
@@ -1121,8 +1117,6 @@
         config = {
           isConfigured: false,
           initialSavings_TL: 0,
-          eurSavings: 0,
-          usdSavings: 0,
           havuzALimit: 0,
           fatherQuota: 0,
           dailyCampusLimit: 300
